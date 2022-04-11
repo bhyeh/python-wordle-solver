@@ -4,4 +4,7 @@
 
 #### Dependencies:
 * NumPy
-* Selenium
+* Selenium (4.1.0)
+
+### Run Local:
+* `python badbot.py`

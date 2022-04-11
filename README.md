@@ -1,5 +1,7 @@
-# CS 4701 Artifical Intelligence Practicum
+# CS 4701 Practicum in AI
 
-### Authors: 
+#### Authors: Arianna Curillo, Benjamin Yeh, Jessie Wong
 
-### Dependencies:
+#### Dependencies:
+* NumPy
+* Selenium

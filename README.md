@@ -6,5 +6,5 @@
 * NumPy
 * Selenium (4.1.0)
 
-### Run Local:
+#### Run Local:
 * `python badbot.py`

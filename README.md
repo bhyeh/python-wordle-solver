@@ -8,4 +8,4 @@
 * webdriver-manager
 
 #### Run Local:
-* `python badbot.py`
+* `python playwordle.py`

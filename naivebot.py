@@ -8,24 +8,28 @@ import numpy as np
 from numpy import random
 from time import sleep
 
-class WordleBot():
+class WordleBot:
 
     """
-    
+    A naive bot that makes random guessed-attempts
+
+    Method
+    ------
+    play_worlde(self) :
+        Opens web browser to NYT Wordle site and makes six random guessess 
 
     """
 
     def __init__(self):
         """
-        
+        Initializes bot with official list of possible and valid guesses
 
         """
-
         self.wordle_guesses = np.loadtxt('wordle-guesses.txt', dtype = str)
 
     def open_wordle(self):
         """
-        
+        Creates instance of Chrome Web Driver and navigates to official NYT Wordle site
 
         """
 
@@ -38,8 +42,8 @@ class WordleBot():
 
     def make_random_guess(self):
         """
-        
-        
+        Generates random guess from list of valid guesses
+
         """
 
         guess_idx = np.random.randint(low = 0, high = len(self.wordle_guesses))
@@ -50,7 +54,17 @@ class WordleBot():
 
     def evaluate_random_guess(self, idx):
         """
-        
+        Evaluates the quality of guess at time step `idx` through simple scoring metric
+
+        Parameters
+        ----------
+        idx : int
+            integer indicating attempt number
+
+        Returns
+        -------
+        correctness : float
+            ratio describing quality of attempt
         
         """
 
@@ -74,7 +88,7 @@ class WordleBot():
 
     def play_wordle(self):
         """
-        
+        Plays single game of Wordle
 
         """
 

@@ -1,4 +1,4 @@
-# CS 4701 Practicum in AI
+# CS 4701 Practicum in Artificial Intelligence 
 
 #### Authors: Arianna Curillo, Benjamin Yeh, Jessie Wong
 

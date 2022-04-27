@@ -8,7 +8,9 @@ import numpy as np
 from numpy import random
 from time import sleep
 
-class RandomBot:
+from bot import Bot
+
+class RandomBot(Bot):
 
     """
     A bot that makes random guessed-attempts

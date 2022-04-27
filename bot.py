@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -18,8 +19,26 @@ class Bot:
 
   def __init__(self):
     """
-    \\TODO: Write docstring
-    
+    Creates instance of Chrome Web Driver and initializes state with official guess list
+
     """
     
-    self.wordle_guesses = np.loadtxt('wordle-guesses.txt', dtype = str)
+    self.driver = webdriver.Chrome(ChromeDriverManager().install())
+    self.state = np.loadtxt('wordle-guesses.txt', dtype = str)
+
+  def open_wordle(self):
+      """
+      Navigates to official NYT Wordle site
+
+      """
+
+      # Navigate to NYT Wordle site
+      self.driver.get('https://www.nytimes.com/games/wordle/index.html')
+      # Minimize tab
+      self.actions = ActionChains(self.driver)
+      self.actions.click().perform()
+      sleep(2.5)
+
+  @abstractmethod
+  def play_wordle():
+    pass

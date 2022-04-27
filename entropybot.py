@@ -10,22 +10,14 @@ from time import sleep
 
 from bot import Bot
 
-class EntropyBot:
+class EntropyBot(Bot):
 
   """
   \\TODO: Write class docstring
 
   """
 
-  def __init__(self):
-      """
-      Initializes bot with official list of possible and valid guesses
-
-      """
-      self.wordle_guesses = np.loadtxt('wordle-guesses.txt', dtype = str)
-
-
-  def update_state(self, word, idx):
+  def update_state(self, current_state, idx):
     """
     \\TODO: Write docstring
 
@@ -43,8 +35,7 @@ class EntropyBot:
     
     """
 
-    # Current dictionary state
-    old_state = self.wordle_guesses
+    # Initialize new word state
     new_state = []
 
     # Interpret gameboard
@@ -54,25 +45,28 @@ class EntropyBot:
 
     # Parse pattern
     for i, tile in enumerate(game_tiles):
+      letter = tile.get_attribute('letter')
       eval = tile.get_attribute('evaluation')
-      letter = word[i]
+      # Letter is present and at exact position in answer
       if eval == 'correct':
-        # Add words from state with letter at position `i` in word
-        new_state += [word for word in old_state if word[i] == letter]
+        # Add words to new state with letter at position `i` in word
+        new_state += [word for word in current_state if word[i] == letter]
+      # Letter is present in answer
       elif eval == 'present':
-        # Add words from state with letter in word
-        new_state += [word for word in old_state if letter in word]
+        # Add words to new state with letter in word
+        new_state += [word for word in current_state if letter in word]
+      # Letter is not present in answer
       else:
-        # Add words from state without letter is in word
-        new_state += [word for word in old_state if letter not in word ]
+        # Add words to new state without letter in word
+        new_state += [word for word in current_state if letter not in word ]
     
-    return np.array(new_state)
+    return np.unique(new_state)
 
-  def calculate_entropy(self, word):
+  def calculate_information_gain_aux(self, word):
     """"
     \\TODO: Write docstring
 
-
+ 
     Parameters
     ----------
 
@@ -90,3 +84,22 @@ class EntropyBot:
     """
 
     pass
+
+  def play_wordle(self):
+    """
+    \\TODO: Write docstring
+    
+
+    """
+
+    # Open Wordle site
+    self.open_wordle()
+
+    # Make guesses
+    for i in np.arange(6):
+
+      sleep(2.5)
+
+    # Quit
+    sleep(3)
+    self.driver.quit()

@@ -23,26 +23,6 @@ class RandomBot(Bot):
 
     """
 
-    def __init__(self):
-        """
-        Initializes bot with official list of possible and valid guesses
-
-        """
-        self.wordle_guesses = np.loadtxt('wordle-guesses.txt', dtype = str)
-
-    def open_wordle(self):
-        """
-        Creates instance of Chrome Web Driver and navigates to official NYT Wordle site
-
-        """
-
-        self.driver = webdriver.Chrome(ChromeDriverManager().install())
-        self.driver.get('https://www.nytimes.com/games/wordle/index.html')
-
-        self.actions = ActionChains(self.driver)
-        self.actions.click().perform()
-        sleep(2.5)
-
     def make_random_guess(self):
         """
         Generates random guess from list of valid guesses

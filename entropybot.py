@@ -103,13 +103,27 @@ class EntropyBot(Bot):
         # Find intersection of sub-subsets
         sets[i] = list(set.intersection(*map(set, subset)))
     correct, present, absent = tuple(sets)
+    print('-'*80)
+    print('Correct subset size: {}'.format(len(correct)))
+    print('Present subset size: {}'.format(len(present)))
+    print('Absent subset size: {}'.format(len(absent)))
     # New word state is the INTERSECTION of three sub lists; (correct ∩ present ∩ absent)
     #   -> Issue: if either sets (correct, present, absent) are EMPTY;
     #             the intersection including an EMPTY list is also EMPTY
     sets = [subset for subset in [correct, present, absent] if subset]
     new_state = np.array(list(set.intersection(*map(set, sets))))
     print('New word state size: {}'.format(new_state.size))
+    print('-'*80)
+    # WRONG; set self.state to be (old_state - (stuff removed by new state)); keep things we haven't
+    #                                                                         covered yet
+
+    # I.e.; filtering things too early;
     self.state = new_state
+    # Problem 
+    #   -> Reducing search space; eliminating in 'wrong' direction;
+    #      
+    #   -> Need to remove the words removed by `process`;
+
 
   def calculate_word_information_gain(self, word):
     """"
@@ -153,5 +167,5 @@ class EntropyBot(Bot):
       sleep(2.5)
 
     # Quit
-    sleep(3)
+    # sleep(3)
     # self.driver.quit()

@@ -29,8 +29,8 @@ class RandomBot(Bot):
 
         """
 
-        guess_idx = random.randint(low = 0, high = len(self.wordle_guesses))
-        guess = self.wordle_guesses[guess_idx]
+        guess_idx = random.randint(low = 0, high = len(self.state))
+        guess = self.state[guess_idx]
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)
         self.actions.perform()

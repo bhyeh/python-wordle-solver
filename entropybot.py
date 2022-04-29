@@ -1,13 +1,10 @@
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from webdriver_manager.chrome import ChromeDriverManager
 
 import numpy as np
 from numpy import random
 from time import sleep
-
+# Parent class
 from bot import Bot
 
 class EntropyBot(Bot):
@@ -17,7 +14,19 @@ class EntropyBot(Bot):
 
   """
 
-  def update_state(self, current_state, idx):
+  def make_random_guess(self):
+    """
+    Generates random guess from list of valid guesses
+
+    """
+
+    guess_idx = random.randint(low = 0, high = len(self.state))
+    guess = self.state[guess_idx]
+    self.actions.send_keys(guess)
+    self.actions.send_keys(Keys.RETURN)
+    self.actions.perform()
+
+  def update_state(self, idx):
     """
     \\TODO: Write docstring
 
@@ -43,6 +52,8 @@ class EntropyBot(Bot):
     
     """
 
+    # Print current state size
+    print('Current word state size: {}'.format(self.state.size))
     # Interpret gameboard
     game_app = self.driver.find_element(By.TAG_NAME , 'game-app')
     game_rows = self.driver.execute_script("return arguments[0].shadowRoot.getElementById('board')", game_app).find_elements(By.TAG_NAME, 'game-row')
@@ -57,21 +68,50 @@ class EntropyBot(Bot):
       eval = tile.get_attribute('evaluation')
       # Letter is present and at exact position in answer
       if eval == 'correct':
-        # Add words to new state with letter at POSITION `i` in word
-        correct += [word for word in current_state if word[i] == letter]
+        # Add words to new state with letter at POSITION `i` in word;
+        #   -> This requires further filtering; 
+        #      E.g: multiple correct letters at multiple positions
+        #         ('t' @ idx 0) : ['train', 'tank', ... ] 
+        #         ('r' @ idx 1) : ['train', 'brain', ... ]
+        #   -> correct : ['train']
+        #   -> needs to satsify all 'correct' tags
+        correct.append([word for word in self.state if word[i] == letter])
       # Letter is present in answer
       elif eval == 'present':
         # Add words to new state WITH LETTER in word
-        present += [word for word in current_state if letter in word]
+        #   -> This requires further filtering; 
+        #      E.g: multiple present letters
+        #         ('a') : ['apple', 'tank', 'alone' ] 
+        #         ('e') : ['rent', 'prey', ... , 'alone ]
+        #   -> correct : ['alone']
+        #   -> needs to satsify all 'present' tags
+        present.append([word for word in self.state if letter in word])
       # Letter is not present in answer
       else:
         # Add words to new state WITHOUT LETTER in word
-        absent += [word for word in current_state if letter not in word ]
-    # New worde state is INTERSECTION of three states; (correct x present x absent)
-    new_state = list(set.intersection(*map(set, [correct, present, absent])))
-    return new_state
+        absent.append([word for word in self.state if letter not in word ])
+    # Filter lists;
+    #   -> Note: Can not use set.intersection() method on empty list
+    #   -> Note: It (might) be possible that set.intersection() returns
+    #            an empty list
+    #      E.g: (???)
+    sets = [correct, present, absent]
+    for i in np.arange(len(sets)):
+      subset = sets[i]
+      # Check if subset is non-empty
+      if subset:
+        # Find intersection of sub-subsets
+        sets[i] = list(set.intersection(*map(set, subset)))
+    correct, present, absent = tuple(sets)
+    # New word state is the INTERSECTION of three sub lists; (correct ∩ present ∩ absent)
+    #   -> Issue: if either sets (correct, present, absent) are EMPTY;
+    #             the intersection including an EMPTY list is also EMPTY
+    sets = [subset for subset in [correct, present, absent] if subset]
+    new_state = np.array(list(set.intersection(*map(set, sets))))
+    print('New word state size: {}'.format(new_state.size))
+    self.state = new_state
 
-  def calculate_information_gain_aux(self, word):
+  def calculate_word_information_gain(self, word):
     """"
     \\TODO: Write docstring
 
@@ -105,10 +145,13 @@ class EntropyBot(Bot):
     self.open_wordle()
 
     # Make guesses
-    for i in np.arange(6):
-
+    for idx in np.arange(6):
+      # Make random guesses (for now)
+      self.make_random_guess()
+      # Update word state
+      self.update_state(idx)
       sleep(2.5)
 
     # Quit
     sleep(3)
-    self.driver.quit()
+    # self.driver.quit()

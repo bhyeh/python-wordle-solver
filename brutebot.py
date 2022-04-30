@@ -10,8 +10,11 @@ from bot import Bot
 class BruteBot(Bot):
 
   """
-  \\TODO: Write class docstring
+  A brute force bot making random guessed attempts and updating search space accordingly
 
+  Methods
+  --------
+  play_wordle(self)
   """
 
   def __make_random_guess(self):
@@ -26,7 +29,7 @@ class BruteBot(Bot):
     self.actions.send_keys(Keys.RETURN)
     self.actions.perform()
 
-  def __update_word_state(self, game_tiles):
+  def update_word_state(self, game_tiles):
     """
     \\TODO: Write docstring
 
@@ -90,6 +93,7 @@ class BruteBot(Bot):
         #   -> Note: only the FIRST present letter is marked; the second 
         #            will appear ABSENT;
         #   -> Resolve: maintain list of present letters; add condition 
+        # print(letter)
         if letter not in present_letters:
           absent.append([word for word in self.word_state if letter not in word ])
     # Filter lists;
@@ -105,10 +109,10 @@ class BruteBot(Bot):
         # Find intersection of sub-subsets
         sets[i] = list(set.intersection(*map(set, subset)))
     correct, present, absent = tuple(sets)
-    print('-'*80)
-    print('Correct subset size: {}'.format(len(correct)))
-    print('Present subset size: {}'.format(len(present)))
-    print('Absent subset size: {}'.format(len(absent)))
+    # print('-'*80)
+    # print('Correct subset size: {}'.format(len(correct)))
+    # print('Present subset size: {}'.format(len(present)))
+    # print('Absent subset size: {}'.format(len(absent)))
     # New word state is the INTERSECTION of three sub lists: (correct ∩ present ∩ absent)
     #   -> Issue: if either sets - correct, present, or absent are EMPTY;
     #             the intersection including an EMPTY list is also EMPTY
@@ -117,8 +121,6 @@ class BruteBot(Bot):
     new_state = np.array(list(set.intersection(*map(set, sets))))
     print('New word state size: {}'.format(new_state.size))
     print('-'*80)
-    if new_state.size < 10:
-      print(new_state)
     self.word_state = new_state
 
     # Consider case where attempt does not reduce search space;
@@ -133,26 +135,23 @@ class BruteBot(Bot):
     """
 
     # Open Wordle site
-    self.__open_wordle()
-
-    # Make guesses
-    # for idx in np.arange(6):
-    #   # Make random guesses (for now)
-    #   self.__make_random_guess()
-    #   # Update word state
-    #   self.__update_state(idx)
-    #   sleep(2.5)
-
+    self.open_wordle()
+    
+    # Play Wordle; until solved or attempts exhausted 
     idx = 0
     while (self.game_state) and (idx != 6):
-      # First attempt
-      if (idx == 0):
-        self.__make_random_guess()
-        # Get game state
-        game_tiles = self.__get_game_tiles()
-        # Update game state and word state
-        self.__update_game_state(game_tiles)
-        self.__update_word_state(game_tiles)
-      # Second + attempts
+      self.__make_random_guess()
+      # Get game state
+      game_tiles = self.get_game_tiles(idx)
+      # Update game state and word state;
+      self.update_game_state(game_tiles)
+      if not self.game_state:
+        break
       else:
-        self.__make_random_guess()
+        self.update_word_state(game_tiles)
+        # Update idx
+        idx += 1
+        # Sleepy
+        sleep(2.5)
+
+    sleep(60)

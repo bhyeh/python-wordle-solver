@@ -54,7 +54,7 @@ class EntropyBot(Bot):
 
     # Print current state size
     print('Current word state size: {}'.format(self.state.size))
-    # Interpret gameboard
+    # Interpret .js gameboard
     game_app = self.driver.find_element(By.TAG_NAME , 'game-app')
     game_rows = self.driver.execute_script("return arguments[0].shadowRoot.getElementById('board')", game_app).find_elements(By.TAG_NAME, 'game-row')
     game_tiles = self.driver.execute_script('return arguments[0].shadowRoot', game_rows[idx]).find_elements(By.CSS_SELECTOR , 'game-tile')
@@ -62,6 +62,8 @@ class EntropyBot(Bot):
     correct = []
     present = []
     absent = []
+    # Further intialize list to track already present letters
+    present_letters = []
     # Parse pattern
     for i, tile in enumerate(game_tiles):
       letter = tile.get_attribute('letter')
@@ -89,13 +91,17 @@ class EntropyBot(Bot):
       # Letter is not present in answer
       else:
         # Add words to new state WITHOUT LETTER in word
-        absent.append([word for word in self.state if letter not in word ])
+        #   -> Note: only the FIRST present letter is marked; the second 
+        #            will appear ABSENT;
+        #   -> Resolve: maintain list of present letters; add condition 
+        if letter not in present_letters:
+          absent.append([word for word in self.state if letter not in word ])
     # Filter lists;
     #   -> Note: Can not use set.intersection() method on empty list
     #   -> Note: It (might) be possible that set.intersection() returns
     #            an empty list
-    #      E.g: (???)
     sets = [correct, present, absent]
+    # Check for non-emptiness
     for i in np.arange(len(sets)):
       subset = sets[i]
       # Check if subset is non-empty
@@ -107,23 +113,15 @@ class EntropyBot(Bot):
     print('Correct subset size: {}'.format(len(correct)))
     print('Present subset size: {}'.format(len(present)))
     print('Absent subset size: {}'.format(len(absent)))
-    # New word state is the INTERSECTION of three sub lists; (correct ∩ present ∩ absent)
-    #   -> Issue: if either sets (correct, present, absent) are EMPTY;
+    # New word state is the INTERSECTION of three sub lists: (correct ∩ present ∩ absent)
+    #   -> Issue: if either sets - correct, present, or absent are EMPTY;
     #             the intersection including an EMPTY list is also EMPTY
+    #   -> Resolve: filter set and include only non-empty subsets
     sets = [subset for subset in [correct, present, absent] if subset]
     new_state = np.array(list(set.intersection(*map(set, sets))))
     print('New word state size: {}'.format(new_state.size))
     print('-'*80)
-    # WRONG; set self.state to be (old_state - (stuff removed by new state)); keep things we haven't
-    #                                                                         covered yet
-
-    # I.e.; filtering things too early;
     self.state = new_state
-    # Problem 
-    #   -> Reducing search space; eliminating in 'wrong' direction;
-    #      
-    #   -> Need to remove the words removed by `process`;
-
 
   def calculate_word_information_gain(self, word):
     """"

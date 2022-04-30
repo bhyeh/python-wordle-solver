@@ -143,11 +143,12 @@ class BruteBot(Bot):
       self.__make_random_guess()
       # Get game state
       game_tiles = self.get_game_tiles(idx)
-      # Update game state and word state;
+      # Update game state
       self.update_game_state(game_tiles)
       if not self.game_state:
         break
       else:
+        # Update word state
         self.update_word_state(game_tiles)
         # Update idx
         idx += 1

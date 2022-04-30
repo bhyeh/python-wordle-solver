@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 
 import numpy as np
 from numpy import random
@@ -19,7 +20,7 @@ class BruteBot(Bot):
 
   def __make_random_guess(self):
     """
-    Generates random guess from list of valid guesses
+    Generates random guess from current word state
 
     """
 
@@ -31,19 +32,14 @@ class BruteBot(Bot):
 
   def update_word_state(self, game_tiles):
     """
-    \\TODO: Write docstring
+    Updates word state based on previous attempt; parses and reduces search space based
+    on results from last guess
 
     Parameters
     ----------
-    current_state : ndarray
+    game_tiles : ndarray
       remaining valid guesses
 
-    idx : int
-      integer indicating attempt number
-
-    Returns
-    -------
-    new_state : ndarray
 
     Meeting Notes: 4/29/22
     ----------------------
@@ -155,4 +151,9 @@ class BruteBot(Bot):
         # Sleepy
         sleep(2.5)
 
-    sleep(60)
+    sleep(2.5)
+    # Click anywhere to minimize intro tab;
+    self.actions = ActionChains(self.driver)
+    self.actions.click().perform()
+
+    sleep(30)

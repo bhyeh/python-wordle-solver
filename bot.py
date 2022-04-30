@@ -31,7 +31,7 @@ class Bot:
     self.word_state = np.loadtxt('wordle-answers.txt', dtype = str)
     self.game_state = True
 
-  def __open_wordle(self):
+  def open_wordle(self):
       """
       Navigates to official NYT Wordle site
 
@@ -39,12 +39,13 @@ class Bot:
 
       # Navigate Web Driver to NYT Wordle site
       self.driver.get('https://www.nytimes.com/games/wordle/index.html')
+      sleep(2.5)
       # Click anywhere to minimize intro tab;
       self.actions = ActionChains(self.driver)
       self.actions.click().perform()
       sleep(2.5)
 
-  def __get_game_tiles(self, idx):
+  def get_game_tiles(self, idx):
     """
     Returns current game state
 
@@ -56,9 +57,9 @@ class Bot:
     game_tiles = self.driver.execute_script('return arguments[0].shadowRoot', game_rows[idx]).find_elements(By.CSS_SELECTOR , 'game-tile')
     return game_tiles
 
-  def __update_game_state(self, game_tiles):
+  def update_game_state(self, game_tiles):
     """
-    Evaluates current game state
+    Evaluates current game state; updates only completed 
     
     """
 
@@ -68,8 +69,9 @@ class Bot:
     evals = [tile.get_attribute('evaluation') for tile in game_tiles]
     # Game state;
     #   -> Game ends iff all tags are correct
-    #      (given six attempts have not been exhausted)  
-    self.game_state = all(eval != 'correct' for eval in evals)
+    #      (given six attempts have not been exhausted)
+    if all(eval == 'correct' for eval in evals):
+      self.game_state = False
 
   @abstractmethod
   def play_wordle():

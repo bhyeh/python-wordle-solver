@@ -24,7 +24,7 @@ class Bot:
     """
     
     self.driver = webdriver.Chrome(ChromeDriverManager().install())
-    self.state = np.loadtxt('wordle-guesses.txt', dtype = str)
+    self.state = np.loadtxt('wordle-answers.txt', dtype = str)
 
   def open_wordle(self):
       """

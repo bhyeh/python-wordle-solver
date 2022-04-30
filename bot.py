@@ -23,21 +23,53 @@ class Bot:
 
     """
     
+    # Initialize Chrome Web Driver
     self.driver = webdriver.Chrome(ChromeDriverManager().install())
-    self.state = np.loadtxt('wordle-answers.txt', dtype = str)
+    # Intialize word and game states;
+    #   -> word_state : begins with complete space of answers + guesses (?)
+    #   -> game_state : begins `True`; game is ON
+    self.word_state = np.loadtxt('wordle-answers.txt', dtype = str)
+    self.game_state = True
 
-  def open_wordle(self):
+  def __open_wordle(self):
       """
       Navigates to official NYT Wordle site
 
       """
 
-      # Navigate to NYT Wordle site
+      # Navigate Web Driver to NYT Wordle site
       self.driver.get('https://www.nytimes.com/games/wordle/index.html')
-      # Minimize tab
+      # Click anywhere to minimize intro tab;
       self.actions = ActionChains(self.driver)
       self.actions.click().perform()
       sleep(2.5)
+
+  def __get_game_tiles(self, idx):
+    """
+    Returns current game state
+
+    """
+
+    # Interpret .js gameboard
+    game_app = self.driver.find_element(By.TAG_NAME , 'game-app')
+    game_rows = self.driver.execute_script("return arguments[0].shadowRoot.getElementById('board')", game_app).find_elements(By.TAG_NAME, 'game-row')
+    game_tiles = self.driver.execute_script('return arguments[0].shadowRoot', game_rows[idx]).find_elements(By.CSS_SELECTOR , 'game-tile')
+    return game_tiles
+
+  def __update_game_state(self, game_tiles):
+    """
+    Evaluates current game state
+    
+    """
+
+    # Interpret attempt:
+    #   -> Each 'evaluation' attribute takes on one of three values: 
+    #      {'correct', 'present', 'absent'}
+    evals = [tile.get_attribute('evaluation') for tile in game_tiles]
+    # Game state;
+    #   -> Game ends iff all tags are correct
+    #      (given six attempts have not been exhausted)  
+    self.game_state = all(eval != 'correct' for eval in evals)
 
   @abstractmethod
   def play_wordle():

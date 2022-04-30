@@ -14,19 +14,19 @@ class BruteBot(Bot):
 
   """
 
-  def make_random_guess(self):
+  def __make_random_guess(self):
     """
     Generates random guess from list of valid guesses
 
     """
 
-    guess_idx = random.randint(low = 0, high = len(self.state))
-    guess = self.state[guess_idx]
+    guess_idx = random.randint(low = 0, high = len(self.word_state))
+    guess = self.word_state[guess_idx]
     self.actions.send_keys(guess)
     self.actions.send_keys(Keys.RETURN)
     self.actions.perform()
 
-  def update_state(self, idx):
+  def __update_word_state(self, game_tiles):
     """
     \\TODO: Write docstring
 
@@ -53,11 +53,7 @@ class BruteBot(Bot):
     """
 
     # Print current state size
-    print('Current word state size: {}'.format(self.state.size))
-    # Interpret .js gameboard
-    game_app = self.driver.find_element(By.TAG_NAME , 'game-app')
-    game_rows = self.driver.execute_script("return arguments[0].shadowRoot.getElementById('board')", game_app).find_elements(By.TAG_NAME, 'game-row')
-    game_tiles = self.driver.execute_script('return arguments[0].shadowRoot', game_rows[idx]).find_elements(By.CSS_SELECTOR , 'game-tile')
+    print('Current word state size: {}'.format(self.word_state.size))
     # Initialize; correct, present, absent
     correct = []
     present = []
@@ -77,7 +73,7 @@ class BruteBot(Bot):
         #         ('r' @ idx 1) : ['train', 'brain', ... ]
         #   -> correct : ['train']
         #   -> needs to satsify all 'correct' tags
-        correct.append([word for word in self.state if word[i] == letter])
+        correct.append([word for word in self.word_state if word[i] == letter])
       # Letter is present in answer
       elif eval == 'present':
         # Add words to new state WITH LETTER in word
@@ -87,7 +83,7 @@ class BruteBot(Bot):
         #         ('e') : ['rent', 'prey', ... , 'alone ]
         #   -> correct : ['alone']
         #   -> needs to satsify all 'present' tags
-        present.append([word for word in self.state if letter in word])
+        present.append([word for word in self.word_state if letter in word])
       # Letter is not present in answer
       else:
         # Add words to new state WITHOUT LETTER in word
@@ -95,7 +91,7 @@ class BruteBot(Bot):
         #            will appear ABSENT;
         #   -> Resolve: maintain list of present letters; add condition 
         if letter not in present_letters:
-          absent.append([word for word in self.state if letter not in word ])
+          absent.append([word for word in self.word_state if letter not in word ])
     # Filter lists;
     #   -> Note: Can not use set.intersection() method on empty list
     #   -> Note: It (might) be possible that set.intersection() returns
@@ -116,14 +112,18 @@ class BruteBot(Bot):
     # New word state is the INTERSECTION of three sub lists: (correct ∩ present ∩ absent)
     #   -> Issue: if either sets - correct, present, or absent are EMPTY;
     #             the intersection including an EMPTY list is also EMPTY
-    #   -> Resolve: filter set and include only non-empty subsets
+    #   -> Resolve: filter sets and intersect on non-empty subsets
     sets = [subset for subset in [correct, present, absent] if subset]
     new_state = np.array(list(set.intersection(*map(set, sets))))
     print('New word state size: {}'.format(new_state.size))
     print('-'*80)
     if new_state.size < 10:
       print(new_state)
-    self.state = new_state
+    self.word_state = new_state
+
+    # Consider case where attempt does not reduce search space;
+    #   -> In that case; consider keeping track of previous guess
+    #      and removing from pool
 
   def play_wordle(self):
     """
@@ -133,16 +133,26 @@ class BruteBot(Bot):
     """
 
     # Open Wordle site
-    self.open_wordle()
+    self.__open_wordle()
 
     # Make guesses
-    for idx in np.arange(6):
-      # Make random guesses (for now)
-      self.make_random_guess()
-      # Update word state
-      self.update_state(idx)
-      sleep(2.5)
+    # for idx in np.arange(6):
+    #   # Make random guesses (for now)
+    #   self.__make_random_guess()
+    #   # Update word state
+    #   self.__update_state(idx)
+    #   sleep(2.5)
 
-    # Quit
-    # sleep(3)
-    # self.driver.quit()
+    idx = 0
+    while (self.game_state) and (idx != 6):
+      # First attempt
+      if (idx == 0):
+        self.__make_random_guess()
+        # Get game state
+        game_tiles = self.__get_game_tiles()
+        # Update game state and word state
+        self.__update_game_state(game_tiles)
+        self.__update_word_state(game_tiles)
+      # Second + attempts
+      else:
+        self.__make_random_guess()

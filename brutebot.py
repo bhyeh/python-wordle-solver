@@ -137,7 +137,9 @@ class BruteBot(Bot):
     #      E.g.
     #      -> Word: LARVA | Attempt: RURAL | Eval : ['ABSENT', 'ABSENT', 'CORRECT', 'PRESENT', 'PRESENT']
     #      -> 'R' is incorrectly removed from search space; effectively removing the answer as well
-    #
+    # 
+    #      -> When we got to check if 'R' is in CORRECT; it will be FALSE b/c we haven't enumerated the CORRECT
+    #         'R' yet
 
   def play_wordle(self):
     """

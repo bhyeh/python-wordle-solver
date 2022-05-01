@@ -58,11 +58,16 @@ class BruteBot(Bot):
     correct = []
     present = []
     absent = []
-    # Further intialize running list to track already PRESENT 
-    # and CORRECT letters;
-    present_letters = []
-    correct_letters = []
-    # Parse pattern
+    # Intialize running list to track PRESENT and CORRECT letters;
+    correct_present = []
+    # First pass; append CORRECT and PRESENT letters;
+    #   -> This helps with resolving issues with REPEAT letters
+    for tile in game_tiles:
+      letter = tile.get_attribute('letter')
+      eval = tile.get_attribute('evaluation')
+      if (eval == 'correct') or (eval == 'present'):
+        correct_present.append(letter)
+    # Second pass; update search space
     for i, tile in enumerate(game_tiles):
       letter = tile.get_attribute('letter')
       eval = tile.get_attribute('evaluation')
@@ -76,7 +81,6 @@ class BruteBot(Bot):
         #   -> correct : ['train']
         #   -> needs to satsify all 'correct' tags
         correct.append([word for word in self.word_state if word[i] == letter])
-        correct_letters.append(letter)
       # Letter is present in answer
       elif eval == 'present':
         # Add words to new state WITH LETTER in word
@@ -87,7 +91,6 @@ class BruteBot(Bot):
         #   -> correct : ['alone']
         #   -> needs to satsify all 'present' tags
         present.append([word for word in self.word_state if letter in word])
-        present_letters.append(letter)
       # Letter is not present in answer
       else:
         # Add words to new state WITHOUT LETTER in word
@@ -95,7 +98,7 @@ class BruteBot(Bot):
         #   -> Resolve: maintain list of PRESENT letters; add condition 
         #   -> Issue : if repeat letter is before a CORRECT letter; it is marked ABSENT
         #   -> Resolve: maintain list of CORRECT letters
-        if letter not in present_letters:
+        if letter not in correct_present:
           absent.append([word for word in self.word_state if letter not in word ])
     # Filter lists;
     #   -> Note: Can not use set.intersection() method on empty list
@@ -140,6 +143,9 @@ class BruteBot(Bot):
     # 
     #      -> When we got to check if 'R' is in CORRECT; it will be FALSE b/c we haven't enumerated the CORRECT
     #         'R' yet
+    #
+    #   -> Resolve: Perform two passes through `game_tiles`; first pass add to list CORRECT and PRESENT letters
+    #               second pass enumerate and update space
 
   def play_wordle(self):
     """

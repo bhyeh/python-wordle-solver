@@ -53,12 +53,15 @@ class BruteBot(Bot):
 
     # Print current state size
     print('Current word state size: {}'.format(self.word_state.size))
-    # Initialize; correct, present, absent
+    # Initialize lists for correct, present, absent
+    #   -> Contents are sublists
     correct = []
     present = []
     absent = []
-    # Further intialize list to track already present letters
+    # Further intialize running list to track already PRESENT 
+    # and CORRECT letters;
     present_letters = []
+    correct_letters = []
     # Parse pattern
     for i, tile in enumerate(game_tiles):
       letter = tile.get_attribute('letter')
@@ -73,6 +76,7 @@ class BruteBot(Bot):
         #   -> correct : ['train']
         #   -> needs to satsify all 'correct' tags
         correct.append([word for word in self.word_state if word[i] == letter])
+        correct_letters.append(letter)
       # Letter is present in answer
       elif eval == 'present':
         # Add words to new state WITH LETTER in word
@@ -83,45 +87,57 @@ class BruteBot(Bot):
         #   -> correct : ['alone']
         #   -> needs to satsify all 'present' tags
         present.append([word for word in self.word_state if letter in word])
+        present_letters.append(letter)
       # Letter is not present in answer
       else:
         # Add words to new state WITHOUT LETTER in word
-        #   -> Note: only the FIRST present letter is marked; the second 
-        #            will appear ABSENT;
-        #   -> Resolve: maintain list of present letters; add condition 
-        # print(letter)
+        #   -> Note: only the first PRESENT letter is marked; the second is marked ABSENT
+        #   -> Resolve: maintain list of PRESENT letters; add condition 
+        #   -> Issue : if repeat letter is before a CORRECT letter; it is marked ABSENT
+        #   -> Resolve: maintain list of CORRECT letters
         if letter not in present_letters:
           absent.append([word for word in self.word_state if letter not in word ])
     # Filter lists;
     #   -> Note: Can not use set.intersection() method on empty list
-    #   -> Note: It (might) be possible that set.intersection() returns
-    #            an empty list
+    #   -> Note: It is possible that set.intersection() itself returns an empty list
     sets = [correct, present, absent]
     # Check for non-emptiness
     for i in np.arange(len(sets)):
       subset = sets[i]
-      # Check if subset is non-empty
+      # Perform intersection if subset is non empty
       if subset:
-        # Find intersection of sub-subsets
+        # Find intersection of SUB-subsets
         sets[i] = list(set.intersection(*map(set, subset)))
     correct, present, absent = tuple(sets)
-    # print('-'*80)
-    # print('Correct subset size: {}'.format(len(correct)))
-    # print('Present subset size: {}'.format(len(present)))
-    # print('Absent subset size: {}'.format(len(absent)))
     # New word state is the INTERSECTION of three sub lists: (correct ∩ present ∩ absent)
-    #   -> Issue: if either sets - correct, present, or absent are EMPTY;
+    #   -> Note: if either sets - correct, present, or absent are EMPTY;
     #             the intersection including an EMPTY list is also EMPTY
-    #   -> Resolve: filter sets and intersect on non-empty subsets
+    #   -> Resolve: check for non-emptiness again and intersect on non-empty subsets
     sets = [subset for subset in [correct, present, absent] if subset]
     new_state = np.array(list(set.intersection(*map(set, sets))))
     print('New word state size: {}'.format(new_state.size))
     print('-'*80)
     self.word_state = new_state
 
-    # Consider case where attempt does not reduce search space;
-    #   -> In that case; consider keeping track of previous guess
-    #      and removing from pool
+    # 5/1/22 Notes:
+    #   -> Issue of REPEAT letters
+    # 
+    #      Case(1) : Repeated letter is PRESENT;
+    #      -> In this case, only the first occurence is marked PRESENT; 
+    #         and the second occurence is marked ABSENT 
+    #
+    #      Case(2) : Repeated letter is CORRECT;
+    #      -> Two further possible sub-cases :
+    #         (1) First occurence is CORRECT, the second occurence is marked ABSENT
+    #         (2) Second occurence is CORRECT, the first occurence is marked ABSENT
+    #
+    #      -> Second sub-case poses problem; as we enumerate attempt we will mark letter absent
+    #         w/o knowing it is actually correct somewhere in the attempt
+    # 
+    #      E.g.
+    #      -> Word: LARVA | Attempt: RURAL | Eval : ['ABSENT', 'ABSENT', 'CORRECT', 'PRESENT', 'PRESENT']
+    #      -> 'R' is incorrectly removed from search space; effectively removing the answer as well
+    #
 
   def play_wordle(self):
     """

@@ -8,7 +8,7 @@ import numpy as np
 from numpy import random
 from time import sleep
 
-from bot import Bot
+from Bot import Bot
 
 class RandomBot(Bot):
 

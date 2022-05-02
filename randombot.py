@@ -7,37 +7,35 @@ from webdriver_manager.chrome import ChromeDriverManager
 import numpy as np
 from numpy import random
 from time import sleep
-
+# Import parent class
 from Bot import Bot
 
 class RandomBot(Bot):
 
-    """
-    A bot that makes random guessed-attempts
+    """A bot that makes random guessed attempts.
 
     Method
     ------
-    play_worlde(self)
-        Opens web browser, navigates to NYT Wordle site, and proceeds to make 
-        six random guessed-attempts.
+    play_worlde()
+        Opens web browser, navigates to NYT Wordle site, and proceeds to make six random guessed-attempts.
 
     """
 
-    def make_random_guess(self):
-        """
-        Generates random guess from list of valid guesses
+    def __make_random_guess(self):
+        """Generates random guess from current word state and plays guess.
 
         """
 
-        guess_idx = random.randint(low = 0, high = len(self.state))
-        guess = self.state[guess_idx]
+        # Generate random guess
+        guess_idx = random.randint(low = 0, high = len(self.word_state))
+        guess = self.word_state[guess_idx]
+        # Play guess on gameboard
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)
         self.actions.perform()
 
     def evaluate_guess(self, idx):
-        """
-        Evaluates the quality of guess at time step `idx` through simple scoring metric
+        """Evaluates the quality of guess at time step `idx` through simple scoring metric.
 
         Scoring system:
             (1) Each letter of an attempt can take on three values: 'correct', 'present', 'absent'
@@ -60,8 +58,7 @@ class RandomBot(Bot):
 
         Returns
         -------
-        correctness : float
-            ratio describing quality of attempt
+        None
         
         """
 
@@ -85,20 +82,38 @@ class RandomBot(Bot):
         print('Correctness: {:.2f}'.format(correctness))
 
     def play_wordle(self):
-        """
-        Plays game of Wordle
+        """Plays game of Wordle.
+
+        Sequence of actions:
+        (1) Open Wordle
+        (2) Begin playing; while game is ON / attempts left
+            -> Make random guess and play it
+            -> Retrieve game state
+            -> Update game state
+            -> Repeat
 
         """
 
         # Open Wordle site
         self.open_wordle()
-
-        # Make guesses
-        for i in np.arange(6):
-            self.make_random_guess()
-            self.evaluate_guess(i)
-            sleep(2.5)
-
-        # Quit
-        sleep(3)
-        self.driver.quit()
+        # Play Wordle; until solved or attempts are exhausted 
+        idx = 0
+        while (self.game_state) and (idx != 6):
+            self.__make_random_guess()
+            # Get game state
+            game_tiles = self.get_game_tiles(idx)
+            # Update game state
+            self.update_game_state(game_tiles)
+            if not self.game_state:
+                break
+            else:
+                # Update idx
+                idx += 1
+                # Sleepy
+                sleep(2.5)
+        # Click anywhere to minimize intro tab;
+        self.actions = ActionChains(self.driver)
+        self.actions.click()
+        self.actions.perform()
+        # Close Web Driver after 15 seconds;
+        sleep(15)

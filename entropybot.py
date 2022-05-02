@@ -5,7 +5,7 @@ import numpy as np
 from numpy import random
 from time import sleep
 # Parent class
-from bot import Bot
+from Bot import Bot
 
 class EntropyBot(Bot):
 

@@ -9,15 +9,17 @@ from Bot import Bot
 
 class EntropyBot(Bot):
 
-    """
-    \\TODO: Write class docstring
+    """An entropy decision bot that makes better guess attempts based on information gain.
 
     """
 
-    def calculate_word_information_gain(self, word):
-        """"
-        \\TODO: Write docstring
+    def __update_word_state(self):
+        """TODO: Write docstring
+        
+        """
 
+    def __calculate_word_information_gain(self, word):
+        """"TODO: Write docstring
     
         Parameters
         ----------
@@ -27,11 +29,17 @@ class EntropyBot(Bot):
         
         """
 
-    pass
+        pass
 
-    def calculate_information_gain(self):
+    def __calculate_information_gain(self):
+        """TODO: Write docstring
+        
         """
-        \\TODO: Write docstring
+
+        pass
+
+    def play_wordle(self):
+        """
         
         """
 

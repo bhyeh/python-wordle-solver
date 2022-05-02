@@ -11,15 +11,26 @@ from time import sleep
 
 class Bot:
 
-  """
-  \\TODO: Write class docstring
-  
-  
+  """Wordle bot parent class.
+
+  Methods
+  -------
+  open_wordle()
+    Navigates Web Driver to NYT Wordle website.
+
+  get_game_tiles(idx)
+    Parses gameboard and returns list of 'tile' elements from gameboard and 
+    attempt number `idx`.
+
+  update_game_state(game_tiles)
+    Updates game state.
+
   """
 
   def __init__(self):
-    """
-    Creates instance of Chrome Web Driver and initializes state with official guess list
+    """Constructs necessary attributes for a bot to interact and play Wordle.
+    
+    Creates instance of Chrome Web Driver and initializes word and game state.
 
     """
     
@@ -32,8 +43,7 @@ class Bot:
     self.game_state = True
 
   def open_wordle(self):
-      """
-      Navigates to official NYT Wordle site
+      """Navigates Web Driver to NYT Wordle site. 
 
       """
 
@@ -46,8 +56,17 @@ class Bot:
       sleep(2.5)
 
   def get_game_tiles(self, idx):
-    """
-    Returns current game state
+    """Returns current game state.
+
+    Parameters
+    ----------
+    idx : int
+      Attempt number.
+    
+    Returns
+    -------
+    game_tiles : list
+      List of 'tile' elements from gameboard and attempt row.
 
     """
 
@@ -58,9 +77,17 @@ class Bot:
     return game_tiles
 
   def update_game_state(self, game_tiles):
-    """
-    Evaluates current game state; updates only completed 
-    
+    """Evaluates current game state.
+
+    Parameters
+    ----------
+    game_tiles : list
+      List of 'tile' elements from gameboard.
+
+    Returns
+    -------
+    None
+
     """
 
     # Interpret attempt:
@@ -74,5 +101,9 @@ class Bot:
       self.game_state = False
 
   @abstractmethod
-  def play_wordle():
+  def update_word_state(self):
+    pass
+
+  @abstractmethod
+  def play_wordle(self):
     pass

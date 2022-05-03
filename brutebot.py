@@ -179,7 +179,7 @@ class BruteBot(Bot):
         idx += 1
         # Sleepy
         sleep(2.5)
-    # Click anywhere to minimize intro tab;
+    # Click anywhere to minimize outro tab;
     self.actions = ActionChains(self.driver)
     self.actions.click()
     self.actions.perform()

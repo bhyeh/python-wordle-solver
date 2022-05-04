@@ -11,45 +11,45 @@ from Bot import Bot
 
 class EntropyBot(Bot):
 
-    """An entropy decision bot that makes guess attempts based on word information gain.
+    """An entropy decision bot that makes guess attempts based on information gain.
 
     """
-
-    # All possible permutations a word attempt can evaluate to
-    patterns = list(itertools.tools.product(['correct', 'present', 'absent'], repeat = 5))
 
     def __init__(self):
         """\\TODO: Write constructor docstrings
         
         """
+        
         super(EntropyBot, self).__init__()
+        # Initialize all possible permutations a guess can evaluate to
+        self.patterns = list(itertools.tools.product(['correct', 'present', 'absent'], repeat = 5))  
+        # Precompute dictionary containing all possible word `branches` for an attempt and pattern
+        #   -> Read method docstring for more;
+        self.pattern_dict = self.__create_pattern_dict()
 
     def __pattern_match(self, attempt, target):
         """Makes character wise comparison of `attempt` against `target`.
 
-        Following Wordle mode of evaluation:
+        Following Wordle's mode of evaluation:
 
             pattern_match('BABES', 'ABBEY')
             >>> ['present', 'present', 'correct', 'correct', 'absent']
 
-            calculate_pattern('RURAL', 'LARVA')
+            pattern_match('RURAL', 'LARVA')
             >>> ['absent', 'absent', 'correct', 'present', 'present']
             
-            calculate_pattern('STUCK', 'STORY')
+            pattern_match('STUCK', 'STORY')
             >>> ['correct', 'correct', 'absent', 'absent', 'absent']
 
             Import note on REPEAT letters attempts:
                 Case (1) : Repeated letter is PRESENT only once
-                -> Only the first occurence is marked PRESENT, the second/excess is marked
-                   ABSENT
+                -> First occurence is marked PRESENT, excess is marked ABSENT
                 Case (2) : Repeated letter is CORRECT only once
-                -> Two further sub-cases:
-                    (1) First occurence is CORRECT; then the second is marked ABSENT
-                    (2) Second occurence is CORRECT; then the first is marked ABSENT
+                -> Excess is marked ABSENT
                 Case (3) : Repeated letter is both CORRECT and PRESENT
                 -> Excess is marked PRESENT
             
-            Precarious edge case:
+            Edge case:
                 E.g: 'RURAL' against 'LARVA'
                 -> Should evaluate to :     ['ABSENT', 'absent', 'correct', 'present', 'present']
                 -> Should NOT evaluate to : ['PRESENT', 'absent', 'correct', 'present', 'present']
@@ -63,55 +63,89 @@ class EntropyBot(Bot):
 
         Returns
         -------
-        pattern : list
+        pattern : tuple
+            Tuple strings resembling evaluation style of Wordle.
 
         """
 
-        # Pattern match `attempt` against `target`
-        wrong = [i for i, letter in enumerate(attempt) if target[i] != letter]
-        counts = Counter(target[i] for i in wrong)
-        pattern = ['correct'] * 5
-        for i in wrong:
+        # First pass; determine letter indices in which `attempt` and `target` do not match
+        #   -> Append index at incident
+        mismatching_idx = [i for i, a, t in enumerate(zip(attempt, target)) if a != t]
+        # Retrieve the letters of `target` that did not match with `attempt`
+        mismatching = [target[i] for i in mismatching_idx]
+        # Create counter object to count occurence of each mismatching letter in `target`
+        counts = Counter(mismatching)
+        # Second pass; determine which of two cases wrong letter falls into:
+        #   ->  PRESENT or ABSENT
+        pattern = ['correct', 'correct', 'correct', 'correct', 'correct']
+        for i in mismatching_idx:
+            # The letter of `attempt`
             letter = attempt[i]
+            # The letter is PRESENT
             if counts[letter] > 0:
                 pattern[i] = 'present'
+                # Decremenet count;
+                #   -> If letter is repeated again, excess needs to be marked ABSENT
                 counts[letter] -= 1
+            # The letter is ABSENT
             else:
                 pattern[i] = 'absent'
+        pattern = tuple(pattern)
         return pattern
 
 
-    def __generate_pattern_dict(self):
-        """For each word and possible information returned, store a list
-        of candidate words
+    def __create_pattern_dict(self):
+        """Computes and stores all possible word `branches` from an attempt and pattern.
 
-            >>> pattern_dict = generate_pattern_dict(['weary', 'bears', 'crane'])
-            >>> pattern_dict['crane'][(2, 2, 2, 2, 2)]
-            {'crane'}
+        The object returned is a double nested dictionary structure with key1 as word and key2
+        a pattern and string list as final value. 
 
-            >>> sorted(pattern_dict['crane'][(0, 1, 2, 0, 1)])
-            ['bears', 'weary']
+        Structure : 
+
+            {'word1' : {'pattern1' : list,
+                        'pattern2' : list,
+                         ...
+                         ...
+                        'patternN : list},
+                         
+             'wordN' : {'pattern1' : list,
+                        'pattern2' : list,
+                         ...
+                         ...
+                        'patternN : list}}
+
+            E.g: 
+                Consider word state is the following:
+                -> ['SHARP', 'CHARD', 'HEARD', 'HAIRY', 'WHARF', 'HARRY', ']
+                Then as example if:
+                ->  key1  : 'SHARP'
+                    key2  : 'absent', 'present', 'present', 'correct', 'absent'
+                ->  value : ['CHARD', 'HEARD', 'HAIRY', 'WHARF', 'HARRY']
 
         Parameters
         ----------
 
         Returns
         -------
-        None
+        pattern_dict : dict
 
         """
 
         pattern_dict = defaultdict(lambda: defaultdict(set))
+        # Iterate through each word in word state
         for word in self.word_state:
+            # Iterate again through each word in word state
+            #   -> This time to compare agaisnt
             for match in self.word_state:
+                # Pattern match word against match
                 pattern = self.__pattern_match(word, match)
+                # Append pattern matched word
                 pattern_dict[word][pattern].add(match)
-        return dict(pattern_dict)
+        return pattern_dict
 
 
-    def __calculate_entropies(self, words, possible_words, pattern_dict):
-        """Calculate the entropy for every word in `words`, taking into account
-        the remaining `possible_words`
+    def __calculate_entropies(self):
+        """\\TODO: Write docstring
 
         Parameters
         ----------
@@ -122,20 +156,51 @@ class EntropyBot(Bot):
         
         """
 
-        entropies = {}
-        for word in words:
+        entropies = dict()
+        # Iterate over words in word state
+        for word in self.word_state:
+            # Discrete distribution over pattern
             counts = []
+            # Iterate over all 243 possible evaluations
+            #   -> Effectively builds a distribution over possible patterns
             for pattern in self.patterns:
-                matches = pattern_dict[word][pattern]
-                matches = matches.intersection(possible_words)
+                # `matches` is a list of words branching from `word` that satsify `pattern`
+                #   -> Can be empty
+                matches = self.pattern_dict[word][pattern]
+                # Append length of `matches`; this is the frequency for a given pattern 
                 counts.append(len(matches))
-            entropies[word] = entropy(counts)
+            # Calculates entropy from discrete distribution
+            # entropies[word] = entropy(counts)
         return entropies
 
-    def __update_word_state(self):
-        """TODO: Write docstring
+    def __make_guess(self, entropies):
+        """\\TODO: Write docstring
+
+        Parameters
+        ----------
+        entropies : dict
+
+        Returns
+        -------
+        None
         
         """
+
+        # Determine word with highest entropy
+        #   -> Retrieve key from dictionary with highest value
+        guess = max(entropies.items(), key=lambda x: x[1])[0]   
+        # Play guess on gameboard
+        self.actions.send_keys(guess)
+        self.actions.send_keys(Keys.RETURN)
+        self.actions.perform()
+
+    def __update_word_state(self, game_tiles):
+        """Filters word state
+        
+        """
+
+        # \\HARD TODO;
+        pass
 
     def play_wordle(self):
         """Plays game of Wordle.
@@ -143,7 +208,10 @@ class EntropyBot(Bot):
         Sequence of actions:
             (1) Open Wordle
             (2) Begin playing; while game is ON / attempts left
-                -> \\TODO
+                -> Calculate entropies from current word state
+                -> Guess word w/ maximum entropy
+                -> Reduce word state
+                -> Repeat
         
         """
 
@@ -152,8 +220,25 @@ class EntropyBot(Bot):
         # Play Wordle; until solved or attempts are exhausted 
         idx = 0
         while (self.game_state) and (idx != 6):
-            # \\TODO
-            pass
+            # Calculate entropies
+            entropies = self.__calculate_entropies()
+            # Determine best guess
+            self.__make_guess(entropies)
+            # Get game state
+            game_tiles = self.get_game_tiles(idx)
+            # Update game state
+            self.update_game_state(game_tiles)
+            # Game is won
+            if not self.game_state:
+                break
+            # Continue game
+            else:
+                # Update word state
+                self.__update_word_state(game_tiles)
+                # Increment idx
+                idx += 1
+                # Sleepy
+                sleep(2.5)
         # Click anywhere to minimize outro tab;
         self.actions = ActionChains(self.driver)
         self.actions.click()

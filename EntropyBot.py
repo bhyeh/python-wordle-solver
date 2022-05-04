@@ -1,9 +1,10 @@
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
+import pickle
 import itertools
 import numpy as np
-# from scipy.stats import entropy
+from scipy.stats import entropy
 from collections import defaultdict, Counter
 from time import sleep
 # Parent class
@@ -15,17 +16,20 @@ class EntropyBot(Bot):
 
     """
 
-    def __init__(self):
+    def __init__(self, compute = False):
         """\\TODO: Write constructor docstrings
         
         """
-        
         super(EntropyBot, self).__init__()
         # Initialize all possible permutations a guess can evaluate to
-        self.patterns = list(itertools.tools.product(['correct', 'present', 'absent'], repeat = 5))  
+        self.patterns = list(itertools.product(('correct', 'present', 'absent'), repeat = 5))  
         # Precompute dictionary containing all possible word `branches` for an attempt and pattern
         #   -> Read method docstring for more;
-        self.pattern_dict = self.__create_pattern_dict()
+        if compute:
+            self.pattern_dict = self.__create_pattern_dict()
+        else:
+            with open('pattern_dict.pkl', 'rb') as dict:
+                self.pattern_dict = pickle.load(dict)
 
     def __pattern_match(self, attempt, target):
         """Makes character wise comparison of `attempt` against `target`.
@@ -170,7 +174,7 @@ class EntropyBot(Bot):
                 # Append length of `matches`; this is the frequency for a given pattern 
                 counts.append(len(matches))
             # Calculates entropy from discrete distribution
-            # entropies[word] = entropy(counts)
+            entropies[word] = entropy(counts)
         return entropies
 
     def __make_guess(self, entropies):
@@ -199,8 +203,16 @@ class EntropyBot(Bot):
         
         """
 
-        # \\HARD TODO;
-        pass
+        pattern = []
+        word = ''
+        for tile in game_tiles:
+            letter = tile.get_attribute('letter')
+            eval = tile.get_attribute('evaluation')
+            pattern.append(eval)
+            word += letter
+        pattern = tuple(pattern)
+        new_state = np.array(list(self.pattern_dict[word][pattern]))
+        self.word_state = new_state
 
     def play_wordle(self):
         """Plays game of Wordle.

@@ -7,9 +7,9 @@ from time import sleep
 # Parent class
 from Bot import Bot
 
-class BruteBot(Bot):
+class ReduceBot(Bot):
 
-  """A brute force bot that makes random guessed attempts and updates search space of words based on result.
+  """A brute force bot that makes random guessed attempts and updates/reduces search space of words based on result.
 
   Methods
   --------

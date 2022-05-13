@@ -16,9 +16,21 @@ class ZipfBot(Bot):
     the word with the highest zipf frequency.
 
     Methods
-    -------
-    play_wordle()
-        \\TODO: Write docstrings. 
+    --------
+    play_worlde()
+        Opens web browser, navigates to NYT Wordle site, and proceeds to play a 
+        game.
+
+    make_guess()
+        Generates a greedy guess from current word state and considering 
+        highest zipf frequency. 
+
+    update_word_state()
+        Updates word and zipf state based on most recent attempt.
+        
+        Parses current game state through `game_tiles` and reduces search space 
+        based on the tile evaluation results. Further updates `zipf_dict`. 
+
     
     """
 
@@ -81,7 +93,8 @@ class ZipfBot(Bot):
 
         # Determine word with highest zipf frequency at current word state
         guess = max(self.zipf_dict.items(), key=lambda x: x[1])[0]
-        print('Zipf frequency: {}'.format(self.zipf_dict[guess]))
+        # Print zipf score
+        print('Zipf score: {}'.format(self.zipf_dict[guess]))
         # Play guess on gameboard
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)
@@ -178,30 +191,12 @@ class ZipfBot(Bot):
         # Update state of `zipf_dict`
         self.zipf_dict = {word:zipf for word, zipf in self.zipf_dict.items() if word in self.word_state}
 
-    def __rank_word_state(self):
-        """\\TODO: Write docstrings.
-        
-        """
-
-        pass
-
-    # Naïve approach — simply count in how many words does each letter appear, 
-    # and choose the word with the aggregate 
-    # highest number on its five letters. 
-    #   -> For each correct/present letter guessed; choose the next word 
-    #      with the highest number of each correct/present letter in it
-
     def play_wordle(self):
         """Plays game of Wordle.
 
         Sequence of actions:
             (1) Open Wordle
             (2) Begin playing; while game is ON / attempts left
-                -> Make random guess and play it
-                -> Retrieve game state
-                -> Update game state
-                -> Update word state
-                -> Repeat
 
         """
 

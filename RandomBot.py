@@ -1,9 +1,8 @@
-from selenium import webdriver
+# Import packages performing actions on Website
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
-from webdriver_manager.chrome import ChromeDriverManager
-
+# Import aux functions
 import numpy as np
 from numpy import random
 from time import sleep
@@ -17,7 +16,8 @@ class RandomBot(Bot):
     Method
     ------
     play_worlde()
-        Opens web browser, navigates to NYT Wordle site, and proceeds to make six random guessed-attempts.
+        Opens web browser, navigates to NYT Wordle site, and proceeds to make 
+        six random guessed-attempts.
 
     """
 
@@ -35,10 +35,12 @@ class RandomBot(Bot):
         self.actions.perform()
 
     def evaluate_guess(self, idx):
-        """Evaluates the quality of guess at time step `idx` through simple scoring metric.
+        """Evaluates the quality of guess at time step `idx` through simple 
+        scoring metric.
 
         Scoring system:
-            (1) Each letter of an attempt can take on three values: 'correct', 'present', 'absent'
+            (1) Each letter of an attempt can take on three values: 
+            {'correct', 'present', 'absent'}
                 --> 'correct' : letter is in answer and at correct position
                 --> 'present' : letter is in answer but at incorrect position
                 --> 'absent'  : letter is not in answer
@@ -46,8 +48,8 @@ class RandomBot(Bot):
                 --> 'correct' : 2
                 --> 'present' : 1
                 --> 'absent'  : 0
-            (3) Score an attempt by evaluating each letter, multiply by coresponding label-integer, sum and 
-                divide by 10. 
+            (3) Score an attempt by evaluating each letter, multiply by 
+            coresponding label-integer, sum and divide by 10. 
                 --> Maximum score is 1.0 (all letters correct)
                 --> Minimum score is 0.0 (no letters in answer)
 

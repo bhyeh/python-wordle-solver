@@ -7,7 +7,7 @@ import numpy as np
 from scipy.stats import entropy
 from collections import defaultdict, Counter
 from time import sleep
-# Parent class
+# Import parent class
 from Bot import Bot
 
 class EntropyBot(Bot):
@@ -99,10 +99,11 @@ class EntropyBot(Bot):
 
 
     def __create_pattern_dict(self):
-        """Computes and stores all possible word `branches` from an attempt and pattern.
+        """Computes and stores all possible word `branches` from an attempt and 
+        pattern.
 
-        The object returned is a double nested dictionary structure with key1 as word and key2
-        a pattern and string list as final value. 
+        The object returned is a double nested dictionary structure with key1 
+        as word and key2 a pattern and string list as final value. 
 
         Structure : 
 
@@ -213,6 +214,10 @@ class EntropyBot(Bot):
         pattern = tuple(pattern)
         new_state = np.array(list(self.pattern_dict[word][pattern]))
         self.word_state = new_state
+
+        # 5/12/22 Notes:
+        #   -> Issue of words being played with letters that are no longer 
+        #      valid 
 
     def play_wordle(self):
         """Plays game of Wordle.

@@ -1,6 +1,7 @@
+# Import packages performing actions on Website
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
-
+# Import aux functions
 import numpy as np
 from numpy import random
 from time import sleep
@@ -9,12 +10,14 @@ from Bot import Bot
 
 class ReduceBot(Bot):
 
-  """A brute force bot that makes random guessed attempts and updates/reduces search space of words based on result.
+  """A brute force bot that makes random guessed attempts and updates/reduces 
+  search space of words based on result.
 
   Methods
   --------
   play_worlde()
-      Opens web browser, navigates to NYT Wordle site, and proceeds to make random attempts and update word state.
+      Opens web browser, navigates to NYT Wordle site, and proceeds to make 
+      random attempts and update word state.
 
   """
 
@@ -34,8 +37,8 @@ class ReduceBot(Bot):
   def __update_word_state(self, game_tiles):
     """Updates word state based on most recent attempt.
     
-    Parses current game state through `game_tiles` and reduces search space based on the tile
-    evaluation results.
+    Parses current game state through `game_tiles` and reduces search space 
+    based on the tile evaluation results.
 
     Parameters
     ----------

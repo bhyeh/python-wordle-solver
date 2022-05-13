@@ -1,4 +1,4 @@
-# Import packages performing actions on Website
+# Import packages for performing actions on Website
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 # Import aux libraries
@@ -19,7 +19,7 @@ class ZipfBot(Bot):
     --------
     play_worlde()
         Opens web browser, navigates to NYT Wordle site, and proceeds to play a 
-        game.
+        game of Wordle.
 
     make_guess()
         Generates a greedy guess from current word state and considering 
@@ -34,8 +34,16 @@ class ZipfBot(Bot):
     
     """
 
-    def __init__(self, compute = False, save = False):
+    def __init__(self, compute = True, save = False):
         """\\TODO: Write constructor docstrings
+
+        Attributes
+        ----------
+        compute : bool
+            Indicate to compute Zipf dictionary.
+
+        save : bool
+            Indicate to save computed Zipf dictionary to file.
         
         """
         super(ZipfBot, self).__init__()
@@ -215,6 +223,7 @@ class ZipfBot(Bot):
         # Continue playing; until solved or attempts are exhausted
         idx = 1
         while (self.game_state) and (idx != 6):
+            # Make (greedy) guess
             self.__make_guess()
             # Get game state
             game_tiles = self.get_game_tiles(idx)

@@ -16,8 +16,8 @@ class ReduceBot(Bot):
   Methods
   --------
   play_worlde()
-      Opens web browser, navigates to NYT Wordle site, and proceeds to make 
-      random attempts and update word state.
+      Opens web browser, navigates to NYT Wordle site, and proceeds to play a 
+      game.
 
   """
 

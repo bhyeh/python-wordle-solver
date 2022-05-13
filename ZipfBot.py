@@ -30,7 +30,9 @@ class ZipfBot(Bot):
 
         if compute:
             self.zipf_dict = self.__create_zipf_dict()
-            # \\TODO: Write branch to save file
+            if save:
+                with open('zipf_dict.pkl', 'wb') as dict:
+                    pickle.dump(self.zipf_dict, dict)
         else:
             with open('zipf_dict.pkl', 'rb') as dict:
                 self.zipf_dict = pickle.load(dict)
@@ -79,7 +81,7 @@ class ZipfBot(Bot):
 
         # Determine word with highest zipf frequency at current word state
         guess = max(self.zipf_dict.items(), key=lambda x: x[1])[0]
-        print(self.zipf_dict[guess])
+        print('Zipf frequency: {}'.format(self.zipf_dict[guess]))
         # Play guess on gameboard
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)

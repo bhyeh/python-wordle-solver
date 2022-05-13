@@ -6,5 +6,5 @@ from EntropyBot import EntropyBot
 
 if __name__ == '__main__':
     # replace bot class with desired bot
-    bot = ZipfBot(True)
+    bot = ZipfBot()
     bot.play_wordle()

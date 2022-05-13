@@ -4,8 +4,10 @@
 
 #### Library Dependencies:
 * NumPy
+* SciPy
 * Selenium (4.1.0)
 * webdriver-manager
+* wordfreq
 
 #### Run Local:
 * `python playwordle.py`

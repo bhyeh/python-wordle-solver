@@ -1,6 +1,7 @@
+# Import packages performing actions on Website
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
-
+# Import aux libraries
 import pickle
 import itertools
 import numpy as np

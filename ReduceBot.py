@@ -6,10 +6,10 @@ import numpy as np
 from numpy import random
 from time import sleep
 # Parent class
-from Bot import Bot
+from Bot import Bot  
 
 class ReduceBot(Bot):
-
+  
   """A brute force bot that makes random guessed attempts and updates/reduces 
   search space of words based on result.
 

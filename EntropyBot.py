@@ -5,6 +5,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 import pickle
 import itertools
 import numpy as np
+import numpy.random as random
 from scipy.stats import entropy
 from collections import defaultdict, Counter
 from time import sleep
@@ -17,11 +18,19 @@ class EntropyBot(Bot):
 
     """
 
-    def __init__(self, compute = False):
+    def __init__(self, k = 5, compute = False):
         """\\TODO: Write constructor docstrings
+
+        Attributes
+        ----------
+        k : int
+
+        compute : bool
         
         """
         super(EntropyBot, self).__init__()
+        # Initialize set size of potential openers to sample from
+        self.k = k
         # Initialize all possible permutations a guess can evaluate to
         self.patterns = list(itertools.product(('correct', 'present', 'absent'), repeat = 5))  
         # Precompute dictionary containing all possible word `branches` for an attempt and pattern
@@ -179,6 +188,29 @@ class EntropyBot(Bot):
             entropies[word] = entropy(counts)
         return entropies
 
+    def __make_first_guess(self, entropies):
+        """\\TODO: Write docstring
+
+        Parameters
+        ----------
+        entropies : dict
+
+        Returns
+        -------
+        None
+        
+        """
+
+        # Determine top 'k' words with highest entropy
+        openers = [k for k, _ in sorted(entropies.items(), key = lambda item: item[1], reverse = True)][:self.k]
+        guess = random.choice(openers, 1)[0]
+        print('Guess: ', guess)
+        print('Entropy score: {:.2f}'.format(entropies[guess]))
+        # Play guess on gameboard
+        self.actions.send_keys(guess)
+        self.actions.send_keys(Keys.RETURN)
+        self.actions.perform()
+
     def __make_guess(self, entropies):
         """\\TODO: Write docstring
 
@@ -322,8 +354,14 @@ class EntropyBot(Bot):
         while (self.game_state) and (idx != 6):
             # Calculate entropies
             entropies = self.__calculate_entropies()
-            # Determine best guess
-            self.__make_guess(entropies)
+            # If first guess; sample from top 'k' ranked openers
+            if(idx == 0):
+                self.__make_first_guess(entropies)
+            # Else; determine best guess from highest ranked entropy 
+            # word
+            else:
+                # Determine best guess
+                self.__make_guess(entropies)
             # Get game state
             game_tiles = self.get_game_tiles(idx)
             # Update game state
@@ -343,5 +381,5 @@ class EntropyBot(Bot):
         self.actions = ActionChains(self.driver)
         self.actions.click()
         self.actions.perform()
-        # Close Web Driver after 15 seconds;
-        sleep(15)
+        # Close Web Driver after 20 seconds;
+        sleep(20)

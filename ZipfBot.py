@@ -34,7 +34,7 @@ class ZipfBot(Bot):
     
     """
 
-    def __init__(self, compute = True, save = False):
+    def __init__(self, compute = False, save = False):
         """\\TODO: Write constructor docstrings
 
         Attributes
@@ -109,6 +109,7 @@ class ZipfBot(Bot):
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)
         self.actions.perform()
+        # Remove from word state played word;
 
     def __update_word_state(self, game_tiles):
         """Updates word and zipf state based on most recent attempt.

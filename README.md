@@ -1,6 +1,6 @@
 # CS 4701 Practicum in Artificial Intelligence 
 
-#### Authors: Arianna Curillo, Benjamin Yeh, Jessie Wong
+**Authors:** Arianna Curillo, Benjamin Yeh, Jessie Wong
 
 #### Library Dependencies:
 * NumPy

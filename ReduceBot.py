@@ -29,6 +29,7 @@ class ReduceBot(Bot):
     # Generate random guess
     guess_idx = random.randint(low = 0, high = len(self.word_state))
     guess = self.word_state[guess_idx]
+    print('Guess: ', guess)
     # Play guess on gameboard
     self.actions.send_keys(guess)
     self.actions.send_keys(Keys.RETURN)

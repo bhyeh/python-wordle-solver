@@ -194,7 +194,9 @@ class EntropyBot(Bot):
 
         # Determine word with highest entropy
         #   -> Retrieve key from dictionary with highest value
-        guess = max(entropies.items(), key=lambda x: x[1])[0]   
+        guess = max(entropies.items(), key=lambda x: x[1])[0]
+        print('Guess: ', guess)
+        print('Entropy score: {:.2f}'.format(entropies[guess]))
         # Play guess on gameboard
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)

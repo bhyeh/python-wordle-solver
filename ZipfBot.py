@@ -88,6 +88,7 @@ class ZipfBot(Bot):
         # Generate random guess
         guess_idx = random.randint(low = 0, high = len(self.word_state))
         guess = self.word_state[guess_idx]
+        print('Guess: ', guess)
         # Play guess on gameboard
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)
@@ -102,6 +103,7 @@ class ZipfBot(Bot):
         # Determine word with highest zipf frequency at current word state
         guess = max(self.zipf_dict.items(), key=lambda x: x[1])[0]
         # Print zipf score
+        print('Guess: ', guess)
         print('Zipf score: {}'.format(self.zipf_dict[guess]))
         # Play guess on gameboard
         self.actions.send_keys(guess)

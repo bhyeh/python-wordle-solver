@@ -201,24 +201,104 @@ class EntropyBot(Bot):
         self.actions.perform()
 
     def __update_word_state(self, game_tiles):
-        """Filters word state
+        """Updates word state based on most recent attempt.
+        
+        Parses current game state through `game_tiles` and reduces search space 
+        based on the tile evaluation results. 
+
+        Parameters
+        ----------
+        game_tiles : list
+            List of 'tile' elements from gameboard.
+
+        Returns
+        -------
+        None
         
         """
 
-        pattern = []
-        word = ''
+        # Print current state size
+        print('Current word state size: {}'.format(self.word_state.size))
+        # Initialize lists for correct, present, absent
+        #   -> Elements of each are sublists
+        correct = []
+        present = []
+        absent = []
+        # First pass; append CORRECT and PRESENT letters;
+        #   -> This helps with resolving issues of REPEAT letters
+        # Intialize running list to track PRESENT and CORRECT letters;
+        correct_present = []
         for tile in game_tiles:
             letter = tile.get_attribute('letter')
             eval = tile.get_attribute('evaluation')
+            if (eval == 'correct') or (eval == 'present'):
+                correct_present.append(letter)
+        # Second pass; update search space;
+        #   -> 
+        pattern = []
+        word = ''
+        for i, tile in enumerate(game_tiles):
+            letter = tile.get_attribute('letter')
+            eval = tile.get_attribute('evaluation')
+            # Pattern matching
             pattern.append(eval)
             word += letter
+            # Letter is present and at exact position in answer
+            if eval == 'correct':
+                # Add words to new state with letter at POSITION `i` in word;
+                #   -> This requires later filtering; 
+                #      E.g: multiple correct letters at multiple positions
+                #         ('t' @ idx 0) : ['train', 'tank', ... ] 
+                #         ('r' @ idx 1) : ['train', 'brain', ... ]
+                #   -> correct : ['train']
+                #   -> needs to satsify all 'CORRECT' tags
+                correct.append([word for word in self.word_state if word[i] == letter])
+            # Letter is present in answer
+            elif eval == 'present':
+                # Add words to new state WITH LETTER in word
+                #   -> This requires further filtering; 
+                #      E.g: multiple present letters
+                #         ('a') : ['apple', 'tank', 'alone' ] 
+                #         ('e') : ['apple', 'prey', 'alone ]
+                #   -> present : ['apple', 'alone']
+                #   -> needs to satsify all 'PRESENT' tags
+                present.append([word for word in self.word_state if letter in word])
+            # Letter is not present in answer
+            else:
+                # Add words to new state WITHOUT LETTER in word
+                #   -> Note: only the first PRESENT letter is marked; the second is marked ABSENT
+                #   -> Resolve: maintain list of PRESENT letters; add condition 
+                #   -> Issue : if repeat letter is before a CORRECT letter; it is marked ABSENT
+                #   -> Resolve: maintain list of CORRECT letters
+                # Add iff letter is correct/present already (REPEAT case handling)
+                if letter not in correct_present:
+                    absent.append([word for word in self.word_state if letter not in word ])
+        # Retrieve pattern
         pattern = tuple(pattern)
-        new_state = np.array(list(self.pattern_dict[word][pattern]))
+        # Filter lists; each list is sublist satsifying different letter properties
+        #   -> For each list, we intersect and find common between each sublist
+        #   -> Note: Can not use set.intersection() method on empty list
+        #   -> Note: It is possible that set.intersection() itself returns an empty list
+        sets = [correct, present, absent]
+        for i in np.arange(len(sets)):
+            subset = sets[i]
+            # Perform intersection method if list is non empty
+            if subset:
+                # Find intersection of sub list 
+                sets[i] = list(set.intersection(*map(set, subset)))
+        correct, present, absent = tuple(sets)
+        # New word state is the INTERSECTION of three lists: (correct ∩ present ∩ absent)
+        #   -> Note: if either sets - correct, present, or absent are EMPTY;
+        #            the intersection including an EMPTY list is also EMPTY
+        #   -> Resolve: check for non-emptiness again and intersect on non-empty subsets
+        sets = [subset for subset in [correct, present, absent] if subset]
+        # Add to sets the pattern matched words;
+        sets.append(list(self.pattern_dict[word][pattern]))
+        # Intersect on all FOUR sets now;
+        new_state = np.array(list(set.intersection(*map(set, sets))))
         self.word_state = new_state
-
-        # 5/12/22 Notes:
-        #   -> Issue of words being played with letters that are no longer 
-        #      valid 
+        print('New word state size: {}'.format(new_state.size))
+        print('-'*80)
 
     def play_wordle(self):
         """Plays game of Wordle.

@@ -22,14 +22,14 @@ class ZipfBot(Bot):
         game of Wordle using a greedy zipf based strategy. 
 
     make_guess()
-        Generates a greedy guess from current word state and considering 
-        highest zipf frequency. 
+        Generates a greedy guess from current word state while considering 
+        highest zipf frequencies.
 
     update_word_state()
-        Updates word and zipf state based on most recent attempt.
+        Updates space of possible answers based on most recent attempt.
         
-        Parses current game state through `game_tiles` and reduces search space 
-        based on the tile evaluation results. Further updates `zipf_dict`. 
+        Parses current game state through `game_tiles` and reduces word state 
+        based on the tile evaluation result, while further updating zipf state. 
 
     
     """

@@ -14,7 +14,8 @@ from Bots.Bot import Bot
 
 class EntropyBot(Bot):
 
-    """An entropy decision bot that makes guess attempts based on information gain.
+    """An entropy decision bot that makes guess attempts based on information 
+    gain.
     
     Methods
     -------

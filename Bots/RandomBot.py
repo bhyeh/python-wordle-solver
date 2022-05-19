@@ -19,10 +19,14 @@ class RandomBot(Bot):
         Opens web browser, navigates to NYT Wordle site, and proceeds to make 
         six random guessed-attempts.
 
+    make_random_guess()
+        Generates random guess from space of playable words state and inputs
+        guess.
+
     """
 
     def __make_random_guess(self):
-        """Generates random guess from current word state and plays guess.
+        """Generates random guess from word state and plays guess.
 
         """
 

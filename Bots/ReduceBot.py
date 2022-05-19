@@ -16,14 +16,15 @@ class ReduceBot(Bot):
   Methods
   --------
   play_worlde()
-      Opens web browser, navigates to NYT Wordle site, and proceeds to play a 
-      game.
+    Opens web browser, navigates to NYT Wordle site, and proceeds to play a 
+    game employing no strategy.
 
   make_random_guess()
-    \T\TODO
+    Generates random guess from current space of playable words state and inputs
+    guess.
 
   update_word_state()
-    \\TODO
+    Updates space of possible answers based on most recent attempt.
 
   """
 

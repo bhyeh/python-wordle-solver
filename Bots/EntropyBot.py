@@ -59,7 +59,7 @@ class EntropyBot(Bot):
         if compute:
             self.pattern_dict = self.__create_pattern_dict()
         else:
-            with open('pattern_dict.pkl', 'rb') as dict:
+            with open('Data\\pattern_dict.pkl', 'rb') as dict:
                 self.pattern_dict = pickle.load(dict)
 
     def __pattern_match(self, attempt, target):

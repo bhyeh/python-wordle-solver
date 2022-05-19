@@ -3,11 +3,11 @@
 **Authors:** Arianna Curillo, Benjamin Yeh, Jessie Wong
 
 #### Library Dependencies:
-* NumPy
-* SciPy
-* Selenium (4.1.0)
-* webdriver-manager
-* wordfreq
+* `NumPy`
+* `SciPy`
+* `Selenium (4.1.0)`
+* `webdriver-manager`
+* `wordfreq`
 
 #### Run Local:
 * `python playwordle.py`

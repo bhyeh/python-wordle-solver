@@ -1,5 +1,7 @@
 # CS 4701 Practicum in Artificial Intelligence 
 
+## Solving Wordle
+
 **Authors:** Arianna Curillo, Benjamin Yeh, Jessie Wong
 
 #### Library Dependencies:
@@ -9,5 +11,5 @@
 * `webdriver-manager`
 * `wordfreq`
 
-#### Run Local:
+#### Install and Run:
 * `python playwordle.py`

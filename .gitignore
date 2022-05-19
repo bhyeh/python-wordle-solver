@@ -1,5 +1,9 @@
-__pycache__/Bot.cpython-39.pyc
-__pycache__/EntropyBot.cpython-39.pyc
-__pycache__/RandomBot.cpython-39.pyc
-__pycache__/ReduceBot.cpython-39.pyc
-__pycache__/ZipfBot.cpython-39.pyc
+Bots/__pycache__/RandomBot.cpython-39.pyc
+Data/pattern_dict.pkl
+Data/wordle-answers.txt
+Data/wordle-guesses.txt
+Data/zipf_dict.pkl
+Bots/__pycache__/Bot.cpython-39.pyc
+Bots/__pycache__/EntropyBot.cpython-39.pyc
+Bots/__pycache__/ReduceBot.cpython-39.pyc
+Bots/__pycache__/ZipfBot.cpython-39.pyc

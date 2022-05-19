@@ -19,7 +19,7 @@ class ZipfBot(Bot):
     --------
     play_worlde()
         Opens web browser, navigates to NYT Wordle site, and proceeds to play a 
-        game of Wordle.
+        game of Wordle using a greedy zipf based strategy. 
 
     make_guess()
         Generates a greedy guess from current word state and considering 
@@ -35,7 +35,8 @@ class ZipfBot(Bot):
     """
 
     def __init__(self, compute = False, save = False):
-        """\\TODO: Write constructor docstrings
+        """Constructs additional attributes for bot to play Wordle using simple
+        word-ranking with word-frequencies.
 
         Attributes
         ----------
@@ -58,7 +59,7 @@ class ZipfBot(Bot):
                 self.zipf_dict = pickle.load(dict)
 
     def __create_zipf_dict(self):
-        """\\TODO: Write docstrings
+        """Computes Zipf frequency of each word in initial word state.
 
         Parameters
         ----------
@@ -67,6 +68,10 @@ class ZipfBot(Bot):
         Returns
         -------
         zipf_dict : dict
+            Key : 'word' and value Zipf score.
+            
+            zipf_dict['about'] 
+            >>> 6.4
         
         """
 
@@ -81,7 +86,7 @@ class ZipfBot(Bot):
     def __make_random_guess(self):
         """Generates random guess from current word state and plays guess.
 
-        In ZipfBot class, start game by random guess from word state. 
+        With Zipf strategy, start game by random guess from initial word state. 
 
         """
 
@@ -95,13 +100,15 @@ class ZipfBot(Bot):
         self.actions.perform()
 
     def __make_guess(self):
-        """Generates a greedy guess from current word state and considering 
+        """Generates a greedy guess from current word state by considering 
         highest zipf frequency. 
         
         """
 
         # Determine word with highest zipf frequency at current word state
         guess = max(self.zipf_dict.items(), key=lambda x: x[1])[0]
+        # Define boolean mask to exclude guess in word_state
+        bool_mask = self.word_state != guess
         # Print zipf score
         print('Guess: ', guess)
         print('Zipf score: {}'.format(self.zipf_dict[guess]))
@@ -109,7 +116,8 @@ class ZipfBot(Bot):
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)
         self.actions.perform()
-        # Remove from word state played word;
+        # Remove from word state the just played word
+        self.word_state = self.word_state[bool_mask]
 
     def __update_word_state(self, game_tiles):
         """Updates word and zipf state based on most recent attempt.
@@ -207,27 +215,28 @@ class ZipfBot(Bot):
 
         Sequence of actions:
             (1) Open Wordle
-            (2) Begin playing; while game is ON / attempts left
+            (2) Begin playing with random opener
+            (3) While game is ON / attempts are left
+                -> Guess word w/ maximum zipf score
+                -> Retrieve game state
+                -> Update game state
+                -> Update word state
+                -> Update zipf state
+                -> Repeat
 
         """
 
         # Open Wordle site
         self.open_wordle()
-        # Play Wordle; 
-        #   -> Start game with a random guess
-        self.__make_random_guess()
-        game_tiles = self.get_game_tiles(0)
-        # Update game state
-        self.update_game_state(game_tiles)
-        # Update word state
-        self.__update_word_state(game_tiles)
-        # Sleepy
-        sleep(2.5)
-        # Continue playing; until solved or attempts are exhausted
-        idx = 1
+        # Play Wordle; until solved or attempts are exhausted
+        idx = 0
         while (self.game_state) and (idx != 6):
-            # Make (greedy) guess
-            self.__make_guess()
+            # If first guess; begin with random opener
+            if(idx == 0):
+                self.__make_random_guess()
+            else:
+                # Make (greedy) guess
+                self.__make_guess()
             # Get game state
             game_tiles = self.get_game_tiles(idx)
             # Update game state

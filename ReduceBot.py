@@ -19,6 +19,12 @@ class ReduceBot(Bot):
       Opens web browser, navigates to NYT Wordle site, and proceeds to play a 
       game.
 
+  make_random_guess()
+    \T\TODO
+
+  update_word_state()
+    \\TODO
+
   """
 
   def __make_random_guess(self):
@@ -29,11 +35,15 @@ class ReduceBot(Bot):
     # Generate random guess
     guess_idx = random.randint(low = 0, high = len(self.word_state))
     guess = self.word_state[guess_idx]
+    # Define boolean mask to exclude guess in word_state
+    bool_mask = self.word_state != guess
     print('Guess: ', guess)
     # Play guess on gameboard
     self.actions.send_keys(guess)
     self.actions.send_keys(Keys.RETURN)
     self.actions.perform()
+    # Remove from word state the just played word
+    self.word_state = self.word_state[bool_mask]
 
   def __update_word_state(self, game_tiles):
     """Updates word state based on most recent attempt.

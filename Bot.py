@@ -48,6 +48,8 @@ class Bot:
       """
 
       # Navigate Web Driver to NYT Wordle site
+      #   -> If Wordle ever moves (as it first did when acquired by NYT); code
+      #      will likely break (everywhere; not just here)
       self.driver.get('https://www.nytimes.com/games/wordle/index.html')
       sleep(2.5)
       # Click anywhere to minimize intro tab;
@@ -77,7 +79,7 @@ class Bot:
     return game_tiles
 
   def update_game_state(self, game_tiles):
-    """Evaluates current game state.
+    """Evaluates and updates the current game state.
 
     Parameters
     ----------

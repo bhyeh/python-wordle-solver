@@ -15,21 +15,41 @@ from Bot import Bot
 class EntropyBot(Bot):
 
     """An entropy decision bot that makes guess attempts based on information gain.
+    
+    Methods
+    -------
+    play_wordle()
+        Opens web browser, navigates to NYT Wordle site, and proceeds to play a 
+        game of Wordle using a greedy entropy based strategy. 
+    
+    make_guess()
+        Generates a greedy guess from current word state and considering 
+        highest entropy score. 
+
+    update_word_state()
+        Updates word state based on most recent attempt.
+        
+        Parses current game state through `game_tiles` and reduces search space 
+        based on the tile evaluation results 
 
     """
 
     def __init__(self, k = 5, compute = False):
-        """\\TODO: Write constructor docstrings
+        """Constructor with additional attributes for bot to play Wordle using 
+        word-ranking from entropy scoring.
 
         Attributes
         ----------
         k : int
+            Indicates top 'k' openers (based on entropy score) to sample from 
+            and begin game with.
 
         compute : bool
-        
+            Indicate to compute pattern dictionary at game start.
+
         """
         super(EntropyBot, self).__init__()
-        # Initialize set size of potential openers to sample from
+        # Initialize size of top openers to sample from
         self.k = k
         # Initialize all possible permutations a guess can evaluate to
         self.patterns = list(itertools.product(('correct', 'present', 'absent'), repeat = 5))  
@@ -139,6 +159,7 @@ class EntropyBot(Bot):
 
         Parameters
         ----------
+        None
 
         Returns
         -------
@@ -160,10 +181,11 @@ class EntropyBot(Bot):
 
 
     def __calculate_entropies(self):
-        """\\TODO: Write docstring
+        """Calculates the entropy for each word in the current word state.
 
         Parameters
         ----------
+        None 
 
         Returns
         -------
@@ -189,7 +211,8 @@ class EntropyBot(Bot):
         return entropies
 
     def __make_first_guess(self, entropies):
-        """\\TODO: Write docstring
+        """Generates an opening guess from initial word state by considering 
+        top 'k' words with the highest entropy value. 
 
         Parameters
         ----------
@@ -204,15 +227,20 @@ class EntropyBot(Bot):
         # Determine top 'k' words with highest entropy
         openers = [k for k, _ in sorted(entropies.items(), key = lambda item: item[1], reverse = True)][:self.k]
         guess = random.choice(openers, 1)[0]
+        # Define boolean mask to exclude guess in word_state
+        bool_mask = self.word_state != guess
         print('Guess: ', guess)
         print('Entropy score: {:.2f}'.format(entropies[guess]))
         # Play guess on gameboard
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)
         self.actions.perform()
+        # Remove from word state the just played word
+        self.word_state = self.word_state[bool_mask]
 
     def __make_guess(self, entropies):
-        """\\TODO: Write docstring
+        """Generates a greedy guess from current word state by considering 
+        highest entropy score. 
 
         Parameters
         ----------
@@ -227,12 +255,16 @@ class EntropyBot(Bot):
         # Determine word with highest entropy
         #   -> Retrieve key from dictionary with highest value
         guess = max(entropies.items(), key=lambda x: x[1])[0]
+        # Define boolean mask to exclude guess in word_state
+        bool_mask = self.word_state != guess
         print('Guess: ', guess)
         print('Entropy score: {:.2f}'.format(entropies[guess]))
         # Play guess on gameboard
         self.actions.send_keys(guess)
         self.actions.send_keys(Keys.RETURN)
         self.actions.perform()
+        # Remove from word state the just played word
+        self.word_state = self.word_state[bool_mask]
 
     def __update_word_state(self, game_tiles):
         """Updates word state based on most recent attempt.
@@ -354,7 +386,7 @@ class EntropyBot(Bot):
         while (self.game_state) and (idx != 6):
             # Calculate entropies
             entropies = self.__calculate_entropies()
-            # If first guess; sample from top 'k' ranked openers
+            # If first guess; begin with opener from the top 'k' ranked openers
             if(idx == 0):
                 self.__make_first_guess(entropies)
             # Else; determine best guess from highest ranked entropy 

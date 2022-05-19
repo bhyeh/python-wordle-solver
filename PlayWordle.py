@@ -8,5 +8,5 @@ if __name__ == '__main__':
     # Replace bot class with desired bot (default Zipf)
     #   -> Check source code for constructor arguments (ZipfBot, EntropyBot)
     #      where computations are required for first runs
-    bot = ZipfBot()
+    bot = EntropyBot()
     bot.play_wordle()
